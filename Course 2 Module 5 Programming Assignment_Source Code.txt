@@ -1,0 +1,23 @@
+SQL Source Code for Mappings
+
+WITH occurrence1 as (select distinct mo.subject_id as person_id from mimic3_demo.ADMISSIONS mo),
+    occurrence2 as (select distinct o1.person_id, mo.hadm_id as visit_occurrence_id 
+                   from occurrence1 o1 join mimic3_demo.ADMISSIONS mo on o1.person_id = mo.subject_id),
+     occurrence as (select distinct o2.person_id, o2.visit_occurrence_id
+                    ,mo.icd9_code as condition_source_concept_id           
+                  from occurrence2 o2 join mimic3_demo.DIAGNOSES_ICD mo on o2.visit_occurrence_id = mo.hadm_id)
+                    
+     
+     
+Select * from occurrence
+
+
+SQL Source Code for Quality Measure
+
+WITH occurrence1 as (select mo.subject_id as person_id, count(mo.subject_id) as ADM_CNT from mimic3_demo.ADMISSIONS mo group by mo.subject_id),
+    occurrence2 as (select o1.person_id, mo.hadm_id as visit_occurrence_id, o1.ADM_CNT
+                   from occurrence1 o1 join mimic3_demo.ADMISSIONS mo on o1.person_id = mo.subject_id),
+    occurrence as (select distinct o2.person_id, o2.visit_occurrence_id, o2.ADM_CNT
+                  ,mo.icd9_code as condition_source_concept_id           
+                  from occurrence2 o2 join mimic3_demo.DIAGNOSES_ICD mo on o2.visit_occurrence_id = mo.hadm_id)
+Select* from occurrence where person_id = 41976
